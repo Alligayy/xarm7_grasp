@@ -7,7 +7,7 @@
 ## 功能特性
 
 - **抓取策略执行**：接收 GSNet 检测节点发布的抓取位姿（`/grasp_pose`、`/grasp_width`），通过 `xarm_planner` 服务完成位姿规划、直线规划与轨迹执行，支持仿真与真机两种模式
-- **触觉力反馈夹持（⚠️ 未验证）**：基于 Xela 双侧触觉传感器（`/xServTopic`）的位置式力控闭合设计，包含超力/数据超时等故障锁定与停止机制。**仅为生成的代码，未在真实机械臂与传感器上运行过，能否正常工作未知**
+- **触觉力反馈夹持（⚠️ 未完成验证）**：基于 Xela 双侧触觉传感器（`/xServTopic`）的位置式力控闭合设计，包含超力/数据超时等故障锁定与停止机制。**仅为生成的代码，未在真实机械臂与传感器上运行过，能否正常工作未知**
 - **可达性几何预筛**：利用手眼标定 TF 将相机系抓取位姿变换到基座系，剔除接近方向不合理（易导致奇异点）的候选位姿
 - **手眼标定**：支持 easy_handeye2 的经典 ArUco 流程与自研 ChArUco 检测节点（`charuco_detector`），并提供标定板生成工具（`generate_charuco_board`，输出 PDF 保证打印精度）
 - **运动控制示例**：关节运动、笛卡尔直线运动、回 home 位、夹爪开合等测试脚本
@@ -17,9 +17,9 @@
 ```
 xarm7_grasp/
 ├── config/                  # 参数与标定结果
-│   ├── tactile_grasp.yaml   # 触觉抓取力控参数（⚠️ 未验证）
+│   ├── tactile_grasp.yaml   # 触觉抓取力控参数（⚠️ 未完成验证）
 │   └── *.calib              # easy_handeye2 手眼标定结果（多种算法）
-├── docs/                    # 说明文档（手眼标定、ChArUco、触觉抓取⚠️未验证）
+├── docs/                    # 说明文档（手眼标定、ChArUco、触觉抓取⚠️未完成验证）
 ├── launch/                  # 启动文件
 │   ├── grasp_simulation.launch.py   # 仿真（fake）模式
 │   ├── grasp_real.launch.py         # 真机模式
@@ -33,8 +33,8 @@ xarm7_grasp/
     ├── grasp_policy_xarm.py         # 实际使用的抓取策略（xarm_planner 服务版）
     ├── grasp_policy_xarm_joint.py   # 关节空间抓取策略
     ├── grasp_policy.py              # MoveGroup 动作版抓取策略
-    ├── tactile_gripper.py           # 触觉力反馈夹持控制（⚠️ 未验证）
-    ├── tactile_force.py             # 触觉力处理（⚠️ 未验证）
+    ├── tactile_gripper.py           # 触觉力反馈夹持控制（⚠️ 未完成验证）
+    ├── tactile_force.py             # 触觉力处理（⚠️ 未完成验证）
     ├── charuco_detector.py          # ChArUco 板检测节点
     ├── generate_charuco_board.py    # ChArUco 标定板生成
     ├── go_home*.py / test_*.py      # 运动与夹爪测试脚本
@@ -104,7 +104,7 @@ ros2 run xarm7_grasp charuco_detector
 ros2 run xarm7_grasp generate_charuco_board
 ```
 
-### 触觉力控相关离线测试（⚠️ 力控功能未验证，处于开发阶段）
+### 触觉力控相关离线测试（⚠️ 力控功能未完成验证，处于开发阶段）
 
 以下测试仅验证力控代码的离线逻辑（未接触过真实传感器与机械臂）：
 
@@ -116,7 +116,7 @@ python3 -m pytest -q test/test_tactile_force.py test/test_tactile_samples.py
 
 - [手眼标定说明文档](docs/手眼标定说明文档.md)
 - [ChArUco 手眼标定说明文档](docs/ChArUco手眼标定说明文档.md)
-- [触觉抓取说明文档](docs/tactile_grasp.md)（⚠️ 对应未验证的力控代码）
+- [触觉抓取说明文档](docs/tactile_grasp.md)（⚠️ 对应未完成验证的力控代码）
 
 ## 注意事项
 
