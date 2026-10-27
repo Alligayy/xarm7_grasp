@@ -3,9 +3,9 @@
 <package format="3">
   <name>xarm7_grasp</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>xArm-7 vision-tactile grasping system: grasp policy execution, hand-eye calibration (ArUco/ChArUco) and Xela tactile force-feedback grasping on ROS 2.</description>
   <maintainer email="gao@todo.todo">gao</maintainer>
-  <license>TODO: License declaration</license>
+  <license>MIT</license>
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>xela_server_ros2</exec_depend>

@@ -115,3 +115,7 @@ python3 -m pytest -q test/test_tactile_force.py test/test_tactile_samples.py
 - 触觉力控参数（目标力、力上限、行程等）均为调试起点，实机使用前必须完成传感器归零、受压方向与单位标定，并将 `calibration_confirmed` 置为 `true`
 - 首次实机调试请先在支撑面上用可压缩试件验证，确认停止行为后再执行自动搬运
 - 不要同时从 RViz、其他脚本或手柄发送夹爪命令
+
+## 许可
+
+本项目基于 [MIT License](LICENSE) 开源。

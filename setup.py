@@ -22,8 +22,8 @@ setup(
     zip_safe=True,
     maintainer='gao',
     maintainer_email='gao@todo.todo',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    description='xArm-7 vision-tactile grasping system: grasp policy execution, hand-eye calibration (ArUco/ChArUco) and Xela tactile force-feedback grasping on ROS 2.',
+    license='MIT',
     extras_require={
         'test': [
             'pytest',
