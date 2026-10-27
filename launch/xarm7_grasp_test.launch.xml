@@ -1,0 +1,80 @@
+<!-- 
+    Author: SKK
+    描述：统一启动文件，包含 MoveIt2 + RealSense + xArm7机械臂 + xarm_planner
+-->
+
+<launch>
+    <!-- ==========================================================
+         统一启动文件：MoveIt2 + RealSense + 虚拟障碍物
+         用法：
+           仿真模式:  ros2 launch xarm7_grasp xarm7_grasp_test.launch.xml mode:=sim
+           真机模式:  ros2 launch xarm7_grasp xarm7_grasp_test.launch.xml mode:=real
+         ========================================================== -->
+
+    <!-- 运行模式选择：sim (仿真) 或 real (真机) -->
+    <!-- <arg name="mode" default="sim" description="运行模式: sim(仿真) 或 real(真机)"/> -->
+
+    <!-- ==================== 1. 开启MoveIt2 + xArm7机械臂 + xarm_planner ==================== -->
+    <!-- 1.仿真模式：启动 MoveIt2 fake 控制器 + RViz， 额外启动 xarm_planner_node（xarm_ros2 官方规划服务节点）-->
+    <!-- <include if="$(eval '\'$(var mode)\' == \'sim\'')"
+             file="$(find-pkg-share xarm7_grasp)/launch/grasp_simulation.launch.py"/> -->
+    <!-- （若开启了add_realsense_d435i,会自动发布相机坐标系） -->
+
+    <!-- 2.真机模式：启动 MoveIt2 真实控制器 + RViz， 额外启动 xarm_planner_node-->
+    <!-- <include if="$(eval '\'$(var mode)\' == \'real\'')"
+             file="$(find-pkg-share xarm7_grasp)/launch/grasp_real.launch.py"/> -->
+
+
+    <!-- ==================== 2. 开启RealSense D455相机 ==================== -->
+    <!-- 启动 RealSense 相机节点，发布 RGB + 深度 + 点云话题 -->
+    <!-- 路径：/opt/ros/humble/share/realsense2_camera/launch/rs_launch.py -->
+    <!--  rs_launch.py中有参数检测警告，已经注释掉 -->
+    <!--  禁用TF广播，使用手动发布的标定 -->
+    <!-- 强制设置彩色和深度相机的宽、高、帧率 -->
+
+    <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py"> 
+        <arg name="pointcloud.enable" value="false"/>  
+        <arg name="publish_tf"  value="false"/>   
+        <arg name="align_depth.enable"  value="true"/>
+        <arg name="rgb_camera.color_profile" value="640,480,30"/>
+        <arg name="depth_module.depth_profile" value="640,480,30"/>
+    </include>
+
+    <!-- ==================== 3. 使用easy_handeye2发布手眼标定 TF ==================== -->
+    <!-- 自动加载生成的 xarm7_d455_calibration.calib 并发布静态 TF -->
+     <!-- 根据标定名自动寻找标定文件 /home/gao/.ros2/easy_handeye2/calibrations/xarm7_d455_calibration.calib -->
+    
+    <!-- <include file="$(find-pkg-share easy_handeye2)/launch/publish.launch.py">
+        <arg name="name" value="xarm7_d455_calibration"/> 
+    </include> -->
+
+        <!-- 补发深度到彩色的静态 TF，解决点云无法显示的问题 -->
+        <!-- 由于点云的数据包捆绑相机的camera_depth_optical_frame坐标系，
+        而关闭相机publish_tf后，就只有手动发布的camera_color_optical_frame坐标系，
+        因此，添加一个静态TF转换，将camera_depth_optical_frame坐标系补发到camera_color_optical_frame坐标系 -->
+    
+    <!-- <node pkg="tf2_ros" exec="static_transform_publisher" name="camera_depth_to_color_tf" 
+          args="0 0 0 0 0 0 camera_color_optical_frame camera_depth_optical_frame" 
+          output="screen"/> -->
+
+    <!-- ==================== 3. 或者 使用ROS2自带的节点，手动发布静态 TF 变换 ==================== -->
+    <!-- 参数顺序：x y z qx qy qz qw parent_frame child_frame -->
+    
+    <!-- <node pkg="tf2_ros" exec="static_transform_publisher" name="handeye_tf_publisher"
+          args="0.125815696 0.016836605 0.032781975 -0.011991903 -0.028339288 0.706785084 0.706758745 link_eef camera_color_optical_frame" /> -->
+          <!-- args="0.125815696 0.016836605 0.032781975 -0.011991903 -0.028339288 0.706785084 0.706758745 link_eef camera_color_optical_frame" /> -->
+
+
+    <!-- ==================== 4. 打开相机的彩色图像和深度图展示 ==================== -->
+    <!-- 1. 实时查看 RGB 彩色图 -->
+    <!-- 2. 实时查看 对齐后的深度图 -->
+
+    <node pkg="rqt_image_view" exec="rqt_image_view" name="rgb_viewer" args="/camera/camera/color/image_raw" />
+    <node pkg="rqt_image_view" exec="rqt_image_view" name="depth_viewer" args="/camera/camera/aligned_depth_to_color/image_raw" />
+
+    <!-- ==================== 5. 虚拟障碍物 / 安全边界 ==================== -->
+    <!-- 发布桌面和四面墙体到 MoveIt PlanningScene（自动退出，不常驻） -->
+    
+    <!-- <node pkg="xarm7_grasp" exec="set_env" name="set_env" output="screen"/> -->
+
+</launch>

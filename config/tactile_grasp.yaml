@@ -1,0 +1,25 @@
+grasp_policy_xarm:
+  ros__parameters:
+    # 必须按 /xServTopic 实测填写，示例不预设编号与标定确认。
+    force.left_sensor: -1
+    force.right_sensor: -1
+    force.calibration_confirmed: false
+    force.topic: /xServTopic
+    force.driver_namespace: /xarm
+    force.normal_axis: z
+    force.left_sign: 1.0
+    force.right_sign: 1.0
+    # 以下均为试验起点，不代表物体的安全夹持力。
+    force.target: 1.0            # 每侧法向力 N
+    force.band: 0.15
+    force.contact: 0.2
+    force.maximum: 2.0           # 任一侧总法向力上限 N
+    force.taxel_maximum: 0.6     # 任一 taxel 法向力上限 N
+    force.step: 2.0             # 驱动原生位置单位，非米/弧度
+    force.open_position: 850.0
+    force.close_position: 100.0 # 贴上传感器后重新测量允许的最小位置
+    force.speed: 100.0          # 原生夹爪速度单位
+    force.period: 0.1
+    force.stale_timeout: 0.5
+    force.acquire_timeout: 20.0
+    force.settle_time: 0.5

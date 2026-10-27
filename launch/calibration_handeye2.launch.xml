@@ -1,0 +1,45 @@
+<launch>
+    <!-- ==========================================================
+         手眼标定专属启动文件：xArm7 + RealSense D455
+         说明: 该文件用于执行眼在手 (eye-in-hand) 标定。
+         ========================================================== -->
+
+    <!-- 默认启动真机模式，标定在真机模式下进行，必须开启真实机械臂 -->
+    <arg name="mode" default="real" description="运行模式: real(真机)"/>
+
+    <!-- ==================== 1. MoveIt2 + xArm7 ==================== -->
+    <!-- 启动 MoveIt2 真实控制器 + RViz -->
+    <include file="$(find-pkg-share xarm7_grasp)/launch/grasp_real.launch.py"/>
+
+    <!-- ==================== 2. RealSense D455 ==================== -->
+    <!-- 启动相机节点。注意：标定阶段关闭点云和深度对齐以保证最高帧率和最低延迟 -->
+    <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+        <arg name="pointcloud.enable" value="false"/>
+        <arg name="publish_tf" value="true"/>
+        <arg name="align_depth.enable" value="false"/>
+    </include>
+
+    <!-- ==================== 3. ArUco 识别节点 ==================== -->
+    <!-- 识别桌面上的二维码，发布 /aruco_single/result 位姿和相机画面中的坐标轴 -->
+    <node pkg="aruco_ros" exec="single" name="aruco_single">
+        <remap from="/image" to="/camera/camera/color/image_raw"/>
+        <remap from="/camera_info" to="/camera/camera/color/camera_info"/>
+        <param name="image_is_rectified" value="true"/>
+        <param name="marker_size" value="0.1"/> <!-- 100mm，注意测量一下打印码的尺寸，打印时须选择按照实际大小进行打印，否则尺寸对不上 -->
+        <param name="marker_id" value="55"/>
+        <param name="reference_frame" value="camera_color_optical_frame"/>
+        <param name="camera_frame" value="camera_color_optical_frame"/>
+        <param name="marker_frame" value="camera_marker"/>
+    </node>
+
+    <!-- ==================== 4. easy_handeye2 标定节点 ==================== -->
+    <include file="$(find-pkg-share easy_handeye2)/launch/calibrate.launch.py">
+        <arg name="name" value="xarm7_d455_calibration"/>
+        <arg name="calibration_type" value="eye_in_hand"/>   <!-- 并非 eye_on_hand，而是 eye_in_hand -->
+        <arg name="tracking_base_frame" value="camera_color_optical_frame"/>
+        <arg name="tracking_marker_frame" value="camera_marker"/>
+        <arg name="robot_base_frame" value="link_base"/>
+        <arg name="robot_effector_frame" value="link_eef"/>
+    </include>
+
+</launch>

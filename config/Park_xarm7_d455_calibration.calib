@@ -1,0 +1,20 @@
+parameters:
+  name: xarm7_d455_calibration
+  calibration_type: eye_in_hand
+  robot_base_frame: link_base
+  robot_effector_frame: link_eef
+  tracking_base_frame: camera_color_optical_frame
+  tracking_marker_frame: camera_marker
+  freehand_robot_movement: true
+  move_group_namespace: /
+  move_group: manipulator
+transform:
+  translation:
+    x: 0.10671476593299019
+    y: 0.006909417343216658
+    z: 0.024009682753268223
+  rotation:
+    x: -0.012962638361973065
+    y: -0.017632220401676335
+    z: 0.7037843159557431
+    w: 0.710076553214589

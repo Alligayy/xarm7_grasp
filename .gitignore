@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# 测试与缓存
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ROS 2 / colcon（若在本目录内生成）
+install/
+log/
+devel/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# 系统文件
+.DS_Store
+Thumbs.db

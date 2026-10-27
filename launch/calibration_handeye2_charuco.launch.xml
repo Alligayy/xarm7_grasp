@@ -1,0 +1,56 @@
+<launch>
+    <!-- ==========================================================
+         手眼标定专属启动文件 (ChArUco 版): xArm7 + RealSense D455
+         说明: 用 ChArUco 标定板替换原 ArUco 单码, 提升位姿解算精度。
+               easy_handeye2 部分与原 launch 完全一致, 仅替换了识别节点。
+         ========================================================== -->
+
+    <!-- ==================== 标定板参数 (必须与打印的实物一致) ==================== -->
+    <arg name="squares_x"     default="8"       description="X 方向方格数(列)"/>
+    <arg name="squares_y"     default="6"       description="Y 方向方格数(行)"/>
+    <arg name="square_length" default="0.030"   description="单个方格边长(米), 打印后卡尺复测"/>
+    <arg name="marker_length" default="0.022"   description="单个 ArUco 码边长(米)"/>
+    <arg name="dictionary"    default="DICT_5X5_100" description="ArUco 字典"/>
+    <arg name="min_corners"   default="6"       description="接受解算所需的最少 ChArUco 角点数"/>
+
+    <!-- ==================== 1. MoveIt2 + xArm7 ==================== -->
+    <include file="$(find-pkg-share xarm7_grasp)/launch/grasp_real.launch.py"/>
+
+    <!-- ==================== 2. RealSense D455 ==================== -->
+    <!-- 标定阶段关闭点云和深度对齐以保证最高帧率和最低延迟 -->
+    <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+        <arg name="pointcloud.enable" value="false"/>
+        <arg name="publish_tf" value="true"/>
+        <arg name="align_depth.enable" value="false"/>
+    </include>
+
+    <!-- ==================== 3. ChArUco 识别节点 ==================== -->
+    <!-- 检测 ChArUco 标定板, 发布 TF: camera_color_optical_frame -> camera_marker
+         以及可视化图像 /charuco/result_image -->
+    <node pkg="xarm7_grasp" exec="charuco_detector" name="charuco_detector" output="screen">
+        <param name="squares_x"     value="$(var squares_x)"/>
+        <param name="squares_y"     value="$(var squares_y)"/>
+        <param name="square_length" value="$(var square_length)"/>
+        <param name="marker_length" value="$(var marker_length)"/>
+        <param name="dictionary"    value="$(var dictionary)"/>
+        <param name="min_corners"   value="$(var min_corners)"/>
+        <param name="image_topic"        value="/camera/camera/color/image_raw"/>
+        <param name="camera_info_topic"  value="/camera/camera/color/camera_info"/>
+        <param name="base_frame"         value="camera_color_optical_frame"/>
+        <param name="marker_frame"       value="camera_marker"/>
+        <param name="result_image_topic" value="/charuco/result_image"/>
+        <param name="show_window"        value="false"/>
+    </node>
+
+    <!-- ==================== 4. easy_handeye2 标定节点 ==================== -->
+    <!-- 与原 ArUco 版完全一致: 只消费 TF, 无需修改 -->
+    <include file="$(find-pkg-share easy_handeye2)/launch/calibrate.launch.py">
+        <arg name="name" value="xarm7_d455_calibration"/>
+        <arg name="calibration_type" value="eye_in_hand"/>
+        <arg name="tracking_base_frame" value="camera_color_optical_frame"/>
+        <arg name="tracking_marker_frame" value="camera_marker"/>
+        <arg name="robot_base_frame" value="link_base"/>
+        <arg name="robot_effector_frame" value="link_eef"/>
+    </include>
+
+</launch>
