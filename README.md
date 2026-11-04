@@ -14,17 +14,17 @@
 
 ## 演示视频
 
-真实抓取实验演示（视频托管于 GitHub，本地源文件见 `assets/demo.mp4`）：
+真实抓取实验演示（视频托管于 Bilibili，本地源文件见 `assets/demo.mp4`）。点击下方封面跳转观看：
 
-<video src="https://github.com/user-attachments/assets/ccc5fa2b-8f90-4ac8-bded-3aa1d6a2435c" controls width="720"></video>
+[![演示视频封面](assets/demo_cover.png)](https://www.bilibili.com/video/BV1k8xX6XE6E)
 
-> 若上方视频无法内嵌播放，请点击链接查看：[demo.mp4](https://github.com/user-attachments/assets/ccc5fa2b-8f90-4ac8-bded-3aa1d6a2435c)
+> Bilibili 观看地址：[https://www.bilibili.com/video/BV1k8xX6XE6E](https://www.bilibili.com/video/BV1k8xX6XE6E)
 
 ## 目录结构
 
 ```
 xarm7_grasp/
-├── assets/                  # 静态资源（真实抓取实验演示视频 demo.mp4）
+├── assets/                  # 静态资源（演示视频 demo.mp4 及其封面 demo_cover.png）
 ├── config/                  # 参数与标定结果
 │   ├── tactile_grasp.yaml   # 触觉抓取力控参数（⚠️ 未完成验证）
 │   └── *.calib              # easy_handeye2 手眼标定结果（多种算法）
