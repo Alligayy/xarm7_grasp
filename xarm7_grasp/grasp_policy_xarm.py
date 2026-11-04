@@ -40,7 +40,6 @@ from std_msgs.msg import Float32
 from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 from visualization_msgs.msg import Marker, MarkerArray
 from xarm_msgs.srv import PlanPose, PlanJoint, PlanExec, PlanSingleStraight
-from .tactile_gripper import TactileGripper
 
 
 # ============================================================
@@ -99,8 +98,6 @@ class GraspPolicyXarm(Node):
         self._grasp_width   = 0.0      # 抓取宽度（米）
         self._running       = True    # 抓取序列是否正在执行
         self._lock          = threading.Lock()
-
-        self._force = TactileGripper(self)
 
         # ---- TF2 ----
         self._tf_buffer   = tf2_ros.Buffer()
@@ -174,9 +171,6 @@ class GraspPolicyXarm(Node):
 
     def _cb_grasp_pose(self, msg: PoseStamped):
         """收到抓取姿态（相机坐标系），变换到基坐标系后触发抓取序列"""
-        if self._force.fault:
-            self.get_logger().error(f'力控故障已锁定，人工检查后重启: {self._force.fault}')
-            return
         if self._running:
             self.get_logger().warn('上一次抓取序列尚未完成，忽略本次检测结果。')
             return
@@ -436,7 +430,6 @@ class GraspPolicyXarm(Node):
     
     def _execute_arm_plan(self, wait: bool = True) -> bool:
         """执行机械臂最近一次规划成功的轨迹，wait=True 时阻塞直到运动完成"""
-        self._force.check()
         req = PlanExec.Request()
         req.wait = wait
         return self._call_service(self._exec_plan_client, req, timeout=60.0)
@@ -590,8 +583,6 @@ class GraspPolicyXarm(Node):
           7. 回到观察位姿
         """
         try:
-            self._force.check()
-            self._force.open()  # 每次接近前确认张开及空载
             grasp = self._grasp_pose_base
             w     = self._grasp_width
             self.get_logger().info('=' * 50)
@@ -622,8 +613,10 @@ class GraspPolicyXarm(Node):
                 return
 
             # Step 3: 闭合夹爪
-            self.get_logger().info('[3/7] 触觉闭环夹持，达到两侧目标力后抬起')
-            self._force.acquire()
+            self.get_logger().info(f'[3/7] 闭合夹爪 (drive_joint={self.GRIPPER_CLOSE})')
+            if not self._move_gripper(self.GRIPPER_CLOSE):
+                self._abort()
+                return
 
             # Step 4: 抬起（笛卡尔直线，向上 10cm）
             self.get_logger().info('[4/7] 抬起物体（笛卡尔直线）')
@@ -639,7 +632,9 @@ class GraspPolicyXarm(Node):
 
             # Step 6: 张开夹爪，释放物体
             self.get_logger().info(f'[6/7] 张开夹爪 (drive_joint={self.GRIPPER_OPEN})')
-            self._force.open()
+            if not self._move_gripper(self.GRIPPER_OPEN):
+                self._abort()
+                return
 
             # Step 7: 回到观察位姿（固定关节角，构型可重复、路径平滑）
             self.get_logger().info('[7/7] 回到观察位姿（固定关节角）')
@@ -652,7 +647,6 @@ class GraspPolicyXarm(Node):
             self.get_logger().info('=' * 55)
 
         except Exception as e:
-            self._force.trip(str(e))
             self.get_logger().error(f'抓取序列异常中断: {e}')
             import traceback
             self.get_logger().error(traceback.format_exc())
@@ -661,8 +655,6 @@ class GraspPolicyXarm(Node):
                 self._running = False
 
     def _abort(self):
-        if self._force.thread and self._force.thread.is_alive():
-            self._force.trip('Arm motion failed or cancelled while holding object')
         self.get_logger().info('=' * 55)
         self.get_logger().error('抓取序列中止，等待下一次检测...')
         self.get_logger().info('=' * 55)
@@ -691,10 +683,9 @@ def main(args=None):
         # 同步服务调用的响应由正在 spin 的执行器送达；若在节点构造函数里
         # （spin 之前）调用，会永久卡死且无任何超时提示。
         node.get_logger().info('  移动到观察位姿并打开夹爪...')
-        node._force.wait_ready()  # 参数、标定及新鲜数据就绪后才允许运动
-        node._force.open()
         if not node._move_arm_to_joints(node.WATCH_JOINTS):
             raise RuntimeError('初始化观察位姿运动失败')
+        node._move_gripper(node.GRIPPER_OPEN)  # 打开夹爪
         node._running = False
         node.get_logger().info('='*55)
         node.get_logger().info('  GraspPolicyXarm 节点初始化完成')
@@ -707,9 +698,6 @@ def main(args=None):
     except Exception as exc:
         node.get_logger().error(f'节点停止: {exc}')
     finally:
-        if node._force.thread and node._force.thread.is_alive():
-            node._force.trip('Node shutdown during grasp')
-        node._force.stop()
         executor.shutdown()
         node.destroy_node()
         rclpy.shutdown()
