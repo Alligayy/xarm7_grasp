@@ -12,7 +12,7 @@
          ========================================================== -->
 
     <!-- 运行模式选择：sim (仿真) 或 real (真机) -->
-    <!-- <arg name="mode" default="sim" description="运行模式: sim(仿真) 或 real(真机)"/> -->
+    <arg name="mode" default="sim" description="运行模式: sim(仿真) 或 real(真机)"/>
 
     <!-- ==================== 1. 开启MoveIt2 + xArm7机械臂 + xarm_planner ==================== -->
     <!-- 1.仿真模式：启动 MoveIt2 fake 控制器 + RViz， 额外启动 xarm_planner_node（xarm_ros2 官方规划服务节点）-->
@@ -21,8 +21,8 @@
     <!-- （若开启了add_realsense_d435i,会自动发布相机坐标系） -->
 
     <!-- 2.真机模式：启动 MoveIt2 真实控制器 + RViz， 额外启动 xarm_planner_node-->
-    <!-- <include if="$(eval '\'$(var mode)\' == \'real\'')"
-             file="$(find-pkg-share xarm7_grasp)/launch/grasp_real.launch.py"/> -->
+    <include if="$(eval '\'$(var mode)\' == \'real\'')"
+             file="$(find-pkg-share xarm7_grasp)/launch/grasp_real.launch.py"/>
 
 
     <!-- ==================== 2. 开启RealSense D455相机 ==================== -->
@@ -32,13 +32,13 @@
     <!--  禁用TF广播，使用手动发布的标定 -->
     <!-- 强制设置彩色和深度相机的宽、高、帧率 -->
 
-    <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py"> 
+    <!-- <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py"> 
         <arg name="pointcloud.enable" value="false"/>  
         <arg name="publish_tf"  value="false"/>   
         <arg name="align_depth.enable"  value="true"/>
         <arg name="rgb_camera.color_profile" value="640,480,30"/>
         <arg name="depth_module.depth_profile" value="640,480,30"/>
-    </include>
+    </include> -->
 
     <!-- ==================== 3. 使用easy_handeye2发布手眼标定 TF ==================== -->
     <!-- 自动加载生成的 xarm7_d455_calibration.calib 并发布静态 TF -->
@@ -69,8 +69,8 @@
     <!-- 1. 实时查看 RGB 彩色图 -->
     <!-- 2. 实时查看 对齐后的深度图 -->
 
-    <node pkg="rqt_image_view" exec="rqt_image_view" name="rgb_viewer" args="/camera/camera/color/image_raw" />
-    <node pkg="rqt_image_view" exec="rqt_image_view" name="depth_viewer" args="/camera/camera/aligned_depth_to_color/image_raw" />
+    <!-- <node pkg="rqt_image_view" exec="rqt_image_view" name="rgb_viewer" args="/camera/camera/color/image_raw" /> -->
+    <!-- <node pkg="rqt_image_view" exec="rqt_image_view" name="depth_viewer" args="/camera/camera/aligned_depth_to_color/image_raw" /> -->
 
     <!-- ==================== 5. 虚拟障碍物 / 安全边界 ==================== -->
     <!-- 发布桌面和四面墙体到 MoveIt PlanningScene（自动退出，不常驻） -->

@@ -39,6 +39,7 @@ setup(
          'test_gripper_xarm = xarm7_grasp.test_gripper_xarm:main',
          'grasp_policy = xarm7_grasp.grasp_policy:main',
          'grasp_policy_xarm = xarm7_grasp.grasp_policy_xarm:main',
+         'grasp_policy_xarm_tactile = xarm7_grasp.grasp_policy_xarm_tactile:main',
          'grasp_policy_xarm_joint = xarm7_grasp.grasp_policy_xarm_joint:main',
          'set_env = xarm7_grasp.set_env:main',
          'go_home = xarm7_grasp.go_home:main',
