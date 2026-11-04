@@ -14,11 +14,11 @@
 
 ## 演示视频
 
-真实抓取实验演示（源文件：`assets/demo.mp4`）：
+真实抓取实验演示（视频托管于 GitHub，本地源文件见 `assets/demo.mp4`）：
 
-<video src="assets/demo.mp4" controls width="720"></video>
+<video src="https://github.com/user-attachments/assets/ccc5fa2b-8f90-4ac8-bded-3aa1d6a2435c" controls width="720"></video>
 
-> 若上方视频无法内嵌播放，请点击链接查看：[assets/demo.mp4](assets/demo.mp4)
+> 若上方视频无法内嵌播放，请点击链接查看：[demo.mp4](https://github.com/user-attachments/assets/ccc5fa2b-8f90-4ac8-bded-3aa1d6a2435c)
 
 ## 目录结构
 
