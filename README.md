@@ -2,20 +2,29 @@
 
 基于 **ROS 2 Humble** 的 xArm-7 机械臂视觉抓取系统，集成 RealSense D455 深度相机、手眼标定（ArUco / ChArUco）与 GSNet 抓取位姿检测，并包含一套 **未经验证** 的 Xela 触觉传感器力反馈夹持代码（见下文标注）。
 
-> ⚠️ **重要声明**：本仓库中与触觉力控相关的代码（`grasp_policy_xarm.py` 的触觉模式、`tactile_gripper.py`、`tactile_force.py`、`config/tactile_grasp.yaml` 及 `docs/tactile_grasp.md`）为生成代码，**从未在实际硬件上运行验证过，相关命令能否正常执行未知**，仅供参考，不可直接用于实机。其余视觉抓取、手眼标定与运动控制部分均经过实际验证。
+> ⚠️ **重要声明**：本仓库中与触觉力控相关的代码（`grasp_policy_xarm_tactile.py`、`tactile_gripper.py`、`tactile_force.py`、`config/tactile_grasp.yaml` 及 `docs/tactile_grasp.md`）为生成代码，**从未在实际硬件上运行验证过，相关命令能否正常执行未知**，仅供参考，不可直接用于实机。其余视觉抓取、手眼标定与运动控制部分均经过实际验证。
 
 ## 功能特性
 
 - **抓取策略执行**：接收 GSNet 检测节点发布的抓取位姿（`/grasp_pose`、`/grasp_width`），通过 `xarm_planner` 服务完成位姿规划、直线规划与轨迹执行，支持仿真与真机两种模式
-- **触觉力反馈夹持（⚠️ 未完成验证）**：基于 Xela 双侧触觉传感器（`/xServTopic`）的位置式力控闭合设计，包含超力/数据超时等故障锁定与停止机制。**仅为生成的代码，未在真实机械臂与传感器上运行过，能否正常工作未知**
+- **触觉力反馈夹持（⚠️ 未完成验证）**：基于 Xela 双侧触觉传感器（`/xServTopic`）的位置式力控闭合设计，包含超力/数据超时等故障锁定与停止机制。该策略已从主抓取策略中拆分，独立为 `grasp_policy_xarm_tactile.py`（常规视觉抓取仍为 `grasp_policy_xarm.py`）。**仅为生成的代码，未在真实机械臂与传感器上运行过，能否正常工作未知**
 - **可达性几何预筛**：利用手眼标定 TF 将相机系抓取位姿变换到基座系，剔除接近方向不合理（易导致奇异点）的候选位姿
 - **手眼标定**：支持 easy_handeye2 的经典 ArUco 流程与自研 ChArUco 检测节点（`charuco_detector`），并提供标定板生成工具（`generate_charuco_board`，输出 PDF 保证打印精度）
 - **运动控制示例**：关节运动、笛卡尔直线运动、回 home 位、夹爪开合等测试脚本
+
+## 演示视频
+
+真实抓取实验演示（源文件：`assets/demo.mp4`）：
+
+<video src="assets/demo.mp4" controls width="720"></video>
+
+> 若上方视频无法内嵌播放，请点击链接查看：[assets/demo.mp4](assets/demo.mp4)
 
 ## 目录结构
 
 ```
 xarm7_grasp/
+├── assets/                  # 静态资源（真实抓取实验演示视频 demo.mp4）
 ├── config/                  # 参数与标定结果
 │   ├── tactile_grasp.yaml   # 触觉抓取力控参数（⚠️ 未完成验证）
 │   └── *.calib              # easy_handeye2 手眼标定结果（多种算法）
@@ -30,7 +39,8 @@ xarm7_grasp/
 ├── test/                    # pytest 离线测试（触觉力控，仅逻辑层面）
 ├── utils/                   # 工具函数
 └── xarm7_grasp/             # 节点源码
-    ├── grasp_policy_xarm.py         # 实际使用的抓取策略（xarm_planner 服务版）
+    ├── grasp_policy_xarm.py         # 常规视觉抓取策略（xarm_planner 服务版，已验证）
+    ├── grasp_policy_xarm_tactile.py # 触觉力反馈抓取策略（⚠️ 未完成验证，从主策略拆分独立）
     ├── grasp_policy_xarm_joint.py   # 关节空间抓取策略
     ├── grasp_policy.py              # MoveGroup 动作版抓取策略
     ├── tactile_gripper.py           # 触觉力反馈夹持控制（⚠️ 未完成验证）
@@ -89,7 +99,7 @@ ros2 run xarm7_grasp grasp_policy_xarm
 >
 > ```bash
 > # 触觉力反馈抓取（未验证；理论上需先在 config/tactile_grasp.yaml 中完成传感器标定配置）
-> ros2 run xarm7_grasp grasp_policy_xarm \
+> ros2 run xarm7_grasp grasp_policy_xarm_tactile \
 >   --ros-args --params-file config/tactile_grasp.yaml
 > ```
 
